@@ -8,5 +8,12 @@ use Framework\App;
 
 $app = new App();
 
+$app->get('/');
+$app->get('/user/id');
+$app->get('user/id');
+$app->get('/user/id/');
+
+dd($app);
+
 return $app;
 
