@@ -10,6 +10,7 @@ use App\Controllers\HomeController;
 $app = new App();
 
 $app->get('/', [HomeController::class, 'home']);
+$app->get('/ihi', [HomeController::class, 'home']);
 
 //dd($app);
 
