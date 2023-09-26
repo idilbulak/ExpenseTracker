@@ -7,15 +7,23 @@ namespace Framework;
 class Router {
     private array $routes = [];
 
-    public function add(string $method, string $path) {
+    public function add(string $method, string $path, array $controller) {
         $this->routes[] = [
             'path' => $this->normalizePath($path),
-            'method' => strtoupper($method)
+            'method' => strtoupper($method),
+            'controller' => $controller
         ];
     }
 
     private function normalizePath(string $path) : string {
         $path = trim($path, '/');
         return preg_replace('#[/]{2,}#', '/', "/{$path}/");
+    }
+
+    public function dispatch(string $path, string $method) {
+        $path = $this->normalizePath($path);
+        $method = strtoupper($method);
+
+        echo $path . $method;
     }
 }
