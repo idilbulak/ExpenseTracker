@@ -11,8 +11,8 @@ class AboutController {
 
     private TemplateEngine $view;
 
-    public function __construct() {
-        $this->view = new TemplateEngine(Paths::VIEW);
+    public function __construct(TemplateEngine $view) {
+        $this->view = $view;
     }
 
     public function about() {
