@@ -7,3 +7,7 @@ function dd(mixed $value) {
     echo "</pre>";
 //    die();
 }
+
+function e(mixed $value) {
+    return htmlspecialchars((string)$value);
+}

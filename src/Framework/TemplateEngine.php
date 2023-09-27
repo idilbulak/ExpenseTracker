@@ -11,7 +11,22 @@ class TemplateEngine {
         $this->basePath = $basePath;
     }
 
-    public function render(string $template) {
-        include "{$this->basePath}/{$template}";
+    public function render(string $template, array $data = []) {
+
+        extract($data, EXTR_SKIP);
+
+        ob_start();
+
+        include $this->resolve($template);
+
+        $output = ob_get_contents();
+
+        ob_end_clean();
+
+        return $output;
+    }
+
+    public function resolve(string $path) {
+        return "{$this->basePath}/{$path}";
     }
 }
