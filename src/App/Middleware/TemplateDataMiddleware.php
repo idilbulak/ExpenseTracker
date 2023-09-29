@@ -8,10 +8,14 @@ use Framework\Contracts\MiddlewareInterface;
 use Framework\TemplateEngine;
 class TemplateDataMiddleware implements MiddlewareInterface {
 
-    public function __construct(private TemplateEngine $view) {
+    private TemplateEngine $view;
 
+    public function __construct(TemplateEngine $view) {
+        $this->view = $view;
     }
     public function process(callable $next){
-        echo "Idil";
+        $this->view->addGlobal('title', 'Expense Tracker');
+
+        $next();
     }
 }
