@@ -12,7 +12,8 @@ class Router {
         $this->routes[] = [
             'path' => $this->normalizePath($path),
             'method' => strtoupper($method),
-            'controller' => $controller
+            'controller' => $controller,
+            'middlewares' => []
         ];
     }
 

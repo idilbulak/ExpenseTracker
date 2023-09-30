@@ -16,4 +16,3 @@ registerMiddleware($app);
 //dd($app);
 
 return $app;
-
