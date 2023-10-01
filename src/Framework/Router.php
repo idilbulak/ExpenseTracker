@@ -4,42 +4,64 @@ declare(strict_types=1);
 
 namespace Framework;
 
-class Router {
+class Router
+{
     private array $routes = [];
     private array $middlewares = [];
+    private array $errorHandler;
 
-    public function add(string $method, string $path, array $controller) {
+    public function add(string $method, string $path, array $controller)
+    {
+        $path = $this->normalizePath($path);
+
+        $regexPath = preg_replace('#{[^/]+}#', '([^/]+)', $path);
+
         $this->routes[] = [
-            'path' => $this->normalizePath($path),
+            'path' => $path,
             'method' => strtoupper($method),
             'controller' => $controller,
-            'middlewares' => []
+            'middlewares' => [],
+            'regexPath' => $regexPath
         ];
     }
 
-    private function normalizePath(string $path) : string {
+    private function normalizePath(string $path): string
+    {
         $path = trim($path, '/');
-        return preg_replace('#[/]{2,}#', '/', "/{$path}/");
+        $path = "/{$path}/";
+        $path = preg_replace('#[/]{2,}#', '/', $path);
+
+        return $path;
     }
 
-    public function dispatch(string $path, string $method, Container $container = null) {
+    public function dispatch(string $path, string $method, Container $container = null)
+    {
         $path = $this->normalizePath($path);
-        $method = strtoupper($method);
+        $method = strtoupper($_POST['_METHOD'] ?? $method);
 
-        foreach($this->routes as $route) {
+        foreach ($this->routes as $route) {
             if (
-                !preg_match("#^{$route['path']}$#", $path) ||
+                !preg_match("#^{$route['regexPath']}$#", $path, $paramValues) ||
                 $route['method'] !== $method
             ) {
                 continue;
             }
+
+            array_shift($paramValues);
+
+            preg_match_all('#{([^/]+)}#', $route['path'], $paramKeys);
+
+            $paramKeys = $paramKeys[1];
+
+            $params = array_combine($paramKeys, $paramValues);
+
             [$class, $function] = $route['controller'];
 
             $controllerInstance = $container ?
                 $container->resolve($class) :
                 new $class;
 
-            $action = fn () =>$controllerInstance->{$function}();
+            $action = fn () => $controllerInstance->{$function}($params);
 
             $allMiddleware = [...$route['middlewares'], ...$this->middlewares];
 
@@ -51,10 +73,15 @@ class Router {
             }
 
             $action();
+
+            return;
         }
+
+        $this->dispatchNotFound($container);
     }
 
-    public function addMiddleware(string $middleware) {
+    public function addMiddleware(string $middleware)
+    {
         $this->middlewares[] = $middleware;
     }
 
@@ -64,24 +91,24 @@ class Router {
         $this->routes[$lastRouteKey]['middlewares'][] = $middleware;
     }
 
-//    public function setErrorHandler(array $controller)
-//    {
-//        $this->errorHandler = $controller;
-//    }
+    public function setErrorHandler(array $controller)
+    {
+        $this->errorHandler = $controller;
+    }
 
-//    public function dispatchNotFound(?Container $container)
-//    {
-//        [$class, $function] = $this->errorHandler;
-//
-//        $controllerInstance = $container ? $container->resolve($class) : new $class;
-//
-//        $action = fn () => $controllerInstance->$function();
-//
-//        foreach ($this->middlewares as $middleware) {
-//            $middlewareInstance = $container ? $container->resolve($middleware) : new $middleware;
-//            $action = fn () => $middlewareInstance->process($action);
-//        }
-//
-//        $action();
-//    }
+    public function dispatchNotFound(?Container $container)
+    {
+        [$class, $function] = $this->errorHandler;
+
+        $controllerInstance = $container ? $container->resolve($class) : new $class;
+
+        $action = fn () => $controllerInstance->$function();
+
+        foreach ($this->middlewares as $middleware) {
+            $middlewareInstance = $container ? $container->resolve($middleware) : new $middleware;
+            $action = fn () => $middlewareInstance->process($action);
+        }
+
+        $action();
+    }
 }
