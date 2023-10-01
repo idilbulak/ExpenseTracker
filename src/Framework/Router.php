@@ -41,7 +41,9 @@ class Router {
 
             $action = fn () =>$controllerInstance->{$function}();
 
-            foreach ($this->middlewares as $middleware) {
+            $allMiddleware = [...$route['middlewares'], ...$this->middlewares];
+
+            foreach ($allMiddleware as $middleware) {
                 $middlewareInstance = $container ?
                     $container->resolve($middleware) :
                     new $middleware;
@@ -55,4 +57,31 @@ class Router {
     public function addMiddleware(string $middleware) {
         $this->middlewares[] = $middleware;
     }
+
+    public function addRouteMiddleware(string $middleware)
+    {
+        $lastRouteKey = array_key_last($this->routes);
+        $this->routes[$lastRouteKey]['middlewares'][] = $middleware;
+    }
+
+//    public function setErrorHandler(array $controller)
+//    {
+//        $this->errorHandler = $controller;
+//    }
+
+//    public function dispatchNotFound(?Container $container)
+//    {
+//        [$class, $function] = $this->errorHandler;
+//
+//        $controllerInstance = $container ? $container->resolve($class) : new $class;
+//
+//        $action = fn () => $controllerInstance->$function();
+//
+//        foreach ($this->middlewares as $middleware) {
+//            $middlewareInstance = $container ? $container->resolve($middleware) : new $middleware;
+//            $action = fn () => $middlewareInstance->process($action);
+//        }
+//
+//        $action();
+//    }
 }

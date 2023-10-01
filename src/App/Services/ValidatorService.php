@@ -46,4 +46,21 @@ class ValidatorService {
         ]);
     }
 
+    public function validateLogin(array $formData)
+    {
+        $this->validator->validate($formData, [
+            'email' => ['required', 'email'],
+            'password' => ['required']
+        ]);
+    }
+
+//    public function validateTransaction(array $formData)
+//    {
+//        $this->validator->validate($formData, [
+//            'description' => ['required', 'lengthMax:255'],
+//            'amount' => ['required', 'numeric'],
+//            'date' => ['required', 'dateFormat:Y-m-d']
+//        ]);
+//    }
+
 }
