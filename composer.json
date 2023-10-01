@@ -1,7 +1,9 @@
 {
     "name": "ib/expense-tracker",
     "type": "project",
-    "require": {},
+    "require": {
+        "vlucas/phpdotenv": "^5.5"
+    },
     "autoload": {
         "psr-4": {
             "Framework\\": "src/Framework",
@@ -11,5 +13,8 @@
             "src/App/Config/Routes.php",
             "src/App/Config/Middleware.php"
         ]
+    },
+    "scripts": {
+        "expenseTracker": "php cli.php"
     }
 }
